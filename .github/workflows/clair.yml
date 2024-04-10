@@ -30,4 +30,4 @@ jobs:
           sudo chmod +x /usr/local/bin/clair-scanner
 
       - name: Run Clair scan
-        run: clair-scanner --ip localhost myimage
+        run: sudo clair-scanner --ip localhost myimage
