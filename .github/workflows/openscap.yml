@@ -23,7 +23,7 @@ jobs:
         run: docker build -t myimage .
 
       - name: Install OpenSCAP
-        run: sudo apt-get update && sudo apt-get install -y openscap-utils
+        run: sudo apt-get install libopenscap8
 
       - name: Run OpenSCAP scan
         run: oscap-docker image myimage
