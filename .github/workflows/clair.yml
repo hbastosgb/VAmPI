@@ -1,43 +1,46 @@
-name: Clair Dockerfile Scan
+name: Clair Default Action Scan
 
 on:
   push:
     branches:
-      - master
+      - 'main'
   pull_request:
     branches:
-      - master
-
+      - 'main'
 jobs:
-  clair_scan:
-    name: Clair Dockerfile Scan
+  docker-build:
+    name: "Docker Build"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build Docker image
-        run: docker build -t myimage .
-
-      - name: Run Clair V4 update
-        uses: quay/clair-action@allow-update
-        with:
-          db-file: matcher.db
-          mode: update
-          image-ref: myimage
-          format: sarif
-          output: clair_results.sarif
-
-      - name: Cache DB
+      - name: Grab cache DB
         uses: actions/cache@v3
         with:
           path: matcher.db
           key: matcher.db
-  
+
+      - name: Build Docker image
+        run: docker build -t myimage .
+
+      - name: Run Clair V4
+        uses: quay/clair-action@allow-update
+        with:
+          image-ref: myimage
+          db-file: matcher.db
+          format: sarif
+          output: clair_results.sarif
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sarif
+          path: clair_results.sarif
+          
       - name: Upload sarif
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: clair_results.sarif
+
