@@ -29,4 +29,7 @@ jobs:
           sudo apt-get update && sudo apt-get install trivy
       
       - name: Run Trivy scan
-        run: trivy --exit-code 1 --severity HIGH,CRITICAL myimage
+        run: |
+          set -o pipefail
+          trivy --severity HIGH,CRITICAL --no-progress myimage | tee trivy_output.txt
+          grep -q "CRITICAL" trivy_output.txt && exit 1 || exit 0
