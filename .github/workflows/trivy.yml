@@ -1,4 +1,4 @@
-name: Trivy Dockerfile Scan
+name: Trivy With Install Scan
 
 on:
   push:
