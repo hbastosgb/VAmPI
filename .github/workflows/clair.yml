@@ -22,12 +22,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t myimage .
 
-      - name: Install Clair scanner
-        run: |
-          sudo apt-get update && sudo apt-get install -y libyaml-dev
-          wget https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -O clair-scanner
-          sudo mv clair-scanner /usr/local/bin
-          sudo chmod +x /usr/local/bin/clair-scanner
-
-      - name: Run Clair scan
-        run: sudo clair-scanner --ip localhost myimage
+      - name: Run Clair V4
+        uses: quay/clair-action@main
+        with:
+          image-ref: myimage
