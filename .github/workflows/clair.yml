@@ -1,37 +1,33 @@
-name: Clair
+name: Clair Dockerfile Scan
 
 on:
   push:
     branches:
-      - 'master'
+      - master
   pull_request:
     branches:
-      - 'master'
+      - master
+
 jobs:
-  docker-build:
-    name: "Docker Build"
+  clair_scan:
+    name: Clair Dockerfile Scan
     runs-on: ubuntu-latest
     steps:
-
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -t a-really/great-app:${{ github.sha }} .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Save Docker image
-        run: |
-          docker save -o ${{ github.sha }} a-really/great-app:${{ github.sha }}
+      - name: Build Docker image
+        run: docker build -t myimage .
 
-      - name: Run Clair V4
-        uses: quay/clair-action@main
-        with:
-          image-path: ${{ github.sha }}
-          format: sarif
-          output: clair_results.sarif
-  
-      - name: Upload sarif
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: clair_results.sarif
+      - name: Install Clair scanner
+        run: |
+          sudo apt-get update && sudo apt-get install -y libyaml-dev
+          wget https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -O clair-scanner
+          sudo mv clair-scanner /usr/local/bin
+          sudo chmod +x /usr/local/bin/clair-scanner
+
+      - name: Run Clair scan
+        run: clair-scanner --ip $(hostname -I) myimage
