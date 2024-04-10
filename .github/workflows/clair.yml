@@ -30,6 +30,12 @@ jobs:
           image-ref: myimage
           format: sarif
           output: clair_results.sarif
+
+      - name: Cache DB
+        uses: actions/cache@v3
+        with:
+          path: matcher.db
+          key: matcher.db
   
       - name: Upload sarif
         uses: github/codeql-action/upload-sarif@v2
