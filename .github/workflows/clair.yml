@@ -28,8 +28,9 @@ jobs:
       - name: Run Clair V4
         uses: quay/clair-action@allow-update
         with:
-          image-ref: myimage
           db-file: matcher.db
+          mode: update
+          image-ref: myimage
           format: sarif
           output: clair_results.sarif
           
