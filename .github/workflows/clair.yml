@@ -16,32 +16,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Grab cache DB
-        uses: actions/cache@v3
-        with:
-          path: matcher.db
-          key: matcher.db
-
       - name: Build Docker image
         run: docker build -t myimage .
 
-      - name: Run Clair V4
-        uses: quay/clair-action@allow-update
-        with:
-          db-file: matcher.db
-          mode: update
-          image-ref: myimage
-          format: sarif
-          output: clair_results.sarif
-          
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: sarif
-          path: clair_results.sarif
-          
-      - name: Upload sarif
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: clair_results.sarif
+      - name: Set up Clair
+        shell: bash
+        run: |
+          curl -L \
+            https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 \
+            -o clair-scanner && \
+            chmod +x ./clair-scanner
+          docker run -d --name clair-db arminc/clair-db:latest
+          docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
 
+      - name: Scan image with Clair
+        shell: bash
+        run: |
+          ip=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+          ./clair-scanner --ip $ip myimage
