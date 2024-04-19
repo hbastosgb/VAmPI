@@ -9,10 +9,9 @@ on:
       - 'master'
 jobs:
   docker-build:
-    name: "Docker Build"
+    name: "Clair Scan"
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v2
 
